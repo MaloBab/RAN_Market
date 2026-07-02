@@ -1,0 +1,88 @@
+@import "tailwindcss";
+
+/*
+  DESIGN TOKENS — Catalogue RAN
+  Direction : "poste de contrôle robotique" — fond atelier sombre,
+  jaune FANUC en signal d'alerte/accent, lecture de données façon
+  "viseur" de baie de commande (R-30iB teach pendant).
+*/
+@theme {
+  --color-ran-graphite-950: #0e1012;
+  --color-ran-graphite-900: #15181b;
+  --color-ran-graphite-800: #1d2125;
+  --color-ran-graphite-700: #2a2f34;
+  --color-ran-graphite-600: #3a4147;
+  --color-ran-graphite-400: #6b7480;
+  --color-ran-graphite-200: #c7ccd1;
+  --color-ran-graphite-100: #eef0f1;
+
+  --color-ran-yellow-500: #f7c600; /* signal FANUC */
+  --color-ran-yellow-400: #ffd633;
+  --color-ran-yellow-600: #d9aa00;
+
+  --color-ran-steel-500: #4d7a96;  /* accent secondaire, tech/froid */
+  --color-ran-steel-300: #8fb4c7;
+
+  --color-ran-alert-500: #e2533d; /* erreurs, stock critique */
+  --color-ran-ok-500: #4caf7d;    /* dispo, succès */
+
+  --font-display: "Barlow Condensed", "Arial Narrow", sans-serif;
+  --font-body: "Inter", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+
+  --radius-ran: 2px; /* angles quasi-droits, esprit panneau de baie */
+}
+
+@layer base {
+  html { color-scheme: dark; }
+  body {
+    @apply bg-ran-graphite-950 text-ran-graphite-100 font-body antialiased;
+    background-image:
+      radial-gradient(circle at 0% 0%, rgba(247,198,0,0.04), transparent 40%),
+      repeating-linear-gradient(0deg, rgba(255,255,255,0.012) 0px, rgba(255,255,255,0.012) 1px, transparent 1px, transparent 3px);
+  }
+}
+
+/* Signature : masque "zone restreinte" pour les données commerciales en Vue Client */
+.ran-redacted {
+  position: relative;
+  overflow: hidden;
+  color: transparent !important;
+  border-radius: var(--radius-ran);
+}
+.ran-redacted::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    135deg,
+    var(--color-ran-graphite-700) 0 6px,
+    var(--color-ran-graphite-800) 6px 12px
+  );
+}
+.ran-redacted::after {
+  content: "ACCES RESTREINT";
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  color: var(--color-ran-graphite-400);
+}
+
+/* Bracket corners — viseur de baie, utilisé sur médias et cartes clés */
+.ran-bracket { position: relative; }
+.ran-bracket::before,
+.ran-bracket::after {
+  content: "";
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--color-ran-yellow-500);
+  opacity: 0.85;
+}
+.ran-bracket::before { top: -1px; left: -1px; border-right: none; border-bottom: none; }
+.ran-bracket::after { bottom: -1px; right: -1px; border-left: none; border-top: none; }
