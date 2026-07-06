@@ -1,0 +1,146 @@
+@import "tailwindcss";
+
+/*
+  DESIGN TOKENS — Catalogue RAN (v2)
+  Direction : SaaS enterprise clair, sobre, orienté données.
+  Identité de marque FANUC reprise du logo : jaune (mark, mise en avant)
+  + rouge (action principale, comme le rouge du mot "FANUC" sur fond jaune).
+*/
+@theme {
+  /* Neutres — fond clair, texte encre, pas de gris-bleu générique */
+  --color-ink-950: #0d0f12;
+  --color-ink-900: #16181d;
+  --color-ink-700: #3a3f47;
+  --color-ink-500: #6b7280;
+  --color-ink-400: #8b909a;
+  --color-ink-300: #c7ccd3;
+  --color-ink-200: #e4e7ec;
+  --color-ink-100: #eef1f4;
+  --color-ink-50: #f7f8fa;
+
+  --color-surface: #ffffff;
+  --color-page: #f7f8fa;
+
+  /* Marque FANUC */
+  --color-brand-yellow-500: #ffc629;
+  --color-brand-yellow-600: #e6ac00;
+  --color-brand-yellow-100: #fff6dc;
+
+  --color-brand-red-600: #c81433;
+  --color-brand-red-700: #a30f29;
+  --color-brand-red-100: #fbe6ea;
+
+  --color-ok-600: #157a4a;
+  --color-ok-100: #e3f6ec;
+  --color-warn-700: #8a5a00;
+  --color-warn-100: #fff3d6;
+  --color-danger-600: #c81433;
+  --color-danger-100: #fbe6ea;
+
+  --font-heading: "Plus Jakarta Sans", "Inter", system-ui, sans-serif;
+  --font-body: "Inter", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+
+  --shadow-card: 0 1px 2px rgba(16, 24, 40, 0.04), 0 1px 3px rgba(16, 24, 40, 0.06);
+  --shadow-card-hover: 0 4px 8px rgba(16, 24, 40, 0.06), 0 12px 24px -8px rgba(16, 24, 40, 0.10);
+  --shadow-popover: 0 8px 16px rgba(16, 24, 40, 0.08), 0 24px 48px -12px rgba(16, 24, 40, 0.16);
+
+  --ease-ran: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-page text-ink-900 font-body antialiased;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-brand-red-600);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  ::selection {
+    background: var(--color-brand-yellow-100);
+    color: var(--color-ink-900);
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-ink-300) transparent;
+  }
+  *::-webkit-scrollbar { width: 10px; height: 10px; }
+  *::-webkit-scrollbar-track { background: transparent; }
+  *::-webkit-scrollbar-thumb {
+    background: var(--color-ink-300);
+    border: 2px solid var(--color-surface);
+    border-radius: 999px;
+  }
+  *::-webkit-scrollbar-thumb:hover { background: var(--color-ink-400); }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer utilities {
+  .skip-link {
+    position: fixed;
+    top: -100%;
+    left: 1rem;
+    z-index: 100;
+    background: var(--color-ink-900);
+    color: var(--color-surface);
+    padding: 0.6rem 1rem;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    transition: top 0.15s var(--ease-ran);
+  }
+  .skip-link:focus-visible {
+    top: 1rem;
+  }
+}
+
+/* Masquage des données commerciales en Vue Client : un placeholder neutre
+   et propre plutôt qu'un simple v-if, pour matérialiser la restriction
+   sans casser l'esthétique claire de l'ensemble. */
+.ran-redacted {
+  position: relative;
+  color: transparent !important;
+  border-radius: 6px;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--color-ink-100) 0px,
+    var(--color-ink-100) 8px,
+    var(--color-ink-200) 8px,
+    var(--color-ink-200) 16px
+  );
+}
+.ran-redacted::after {
+  content: "Accès restreint";
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--color-ink-500);
+}
+
+.ran-page-enter-active,
+.ran-page-leave-active {
+  transition: opacity 0.18s var(--ease-ran), transform 0.18s var(--ease-ran);
+}
+.ran-page-enter-from { opacity: 0; transform: translateY(4px); }
+.ran-page-leave-to { opacity: 0; transform: translateY(-4px); }
