@@ -1,0 +1,33 @@
+[project]
+name = "ran-catalogue-backend"
+version = "0.1.0"
+description = "Backend FastAPI — Catalogue robots FANUC reconditionnés (RAN)"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi[standard]>=0.123.2",
+    "sqlalchemy[asyncio]>=2.0.30",
+    "aiosqlite>=0.20.0",
+    "pydantic>=2.11.7",
+    "pydantic-settings>=2.5.2",
+    "python-jose[cryptography]>=3.3.0",
+    "passlib[bcrypt]>=1.7.4",
+    "bcrypt==4.0.1",
+    "python-multipart>=0.0.9",
+    "openpyxl>=3.1.5",
+    "slowapi>=0.1.9",
+    "email-validator>=2.2.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3.0",
+    "pytest-asyncio>=0.24.0",
+    "httpx>=0.27.0",
+]
+mssql = [
+    "aioodbc>=0.5.0",
+    "pyodbc>=5.1.0",
+]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
