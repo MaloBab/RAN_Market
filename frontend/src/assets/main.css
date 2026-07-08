@@ -6,7 +6,7 @@
   Identité de marque FANUC reprise du logo : jaune (mark, mise en avant)
   + rouge (action principale, comme le rouge du mot "FANUC" sur fond jaune).
 */
-@theme {
+:root {
   /* Neutres — fond clair, texte encre, pas de gris-bleu générique */
   --color-ink-950: #0d0f12;
   --color-ink-900: #16181d;
@@ -54,7 +54,11 @@
   }
 
   body {
-    @apply bg-page text-ink-900 font-body antialiased;
+    background-color: var(--color-page);
+    color: var(--color-ink-900);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   :focus-visible {
@@ -105,39 +109,8 @@
     font-weight: 600;
     transition: top 0.15s var(--ease-ran);
   }
-  .skip-link:focus-visible {
-    top: 1rem;
-  }
+  .skip-link:focus-visible {top: 1rem;}
 }
-
-/* Masquage des données commerciales en Vue Client : un placeholder neutre
-   et propre plutôt qu'un simple v-if, pour matérialiser la restriction
-   sans casser l'esthétique claire de l'ensemble. */
-.ran-redacted {
-  position: relative;
-  color: transparent !important;
-  border-radius: 6px;
-  background: repeating-linear-gradient(
-    90deg,
-    var(--color-ink-100) 0px,
-    var(--color-ink-100) 8px,
-    var(--color-ink-200) 8px,
-    var(--color-ink-200) 16px
-  );
-}
-.ran-redacted::after {
-  content: "Accès restreint";
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  color: var(--color-ink-500);
-}
-
 .ran-page-enter-active,
 .ran-page-leave-active {
   transition: opacity 0.18s var(--ease-ran), transform 0.18s var(--ease-ran);

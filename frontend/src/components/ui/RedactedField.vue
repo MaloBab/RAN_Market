@@ -11,7 +11,6 @@ defineProps<{ visible: boolean; width?: string }>()
 
 <template>
   <span v-if="visible"><slot /></span>
-  <span v-else class="ran-redacted inline-block py-0.5 px-2" :style="{ width: width ?? '6rem' }">••••</span>
 </template>
 
 
