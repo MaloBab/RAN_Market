@@ -15,16 +15,13 @@ from collections.abc import AsyncGenerator
 
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine #type: ignore
 from sqlalchemy.orm import DeclarativeBase #type: ignore
+from sqlalchemy import MetaData #type: ignore
 
 from src.config import settings
 
-# Base de données partagée par toute l'entreprise : toutes les tables de
-# cette application sont préfixées pour éviter toute collision de nom avec
-# les autres applications qui utilisent la même base. Source unique de
-# vérité — chaque modèle SQLAlchemy construit son `__tablename__` (et ses
-# `ForeignKey`) à partir de cette constante plutôt que de répéter le
-# préfixe en dur, pour ne jamais désynchroniser l'un des deux.
 TABLE_PREFIX = "ranmarket_"
+DB_SCHEMA = "dbo"
+metadata_obj = MetaData(schema=DB_SCHEMA)
 
 engine_kwargs: dict = {"echo": False}
 
@@ -50,7 +47,7 @@ async_session_factory = async_sessionmaker(
 
 
 class Base(DeclarativeBase):
-    pass
+    metadata = metadata_obj
 
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:

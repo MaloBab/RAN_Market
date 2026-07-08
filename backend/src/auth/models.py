@@ -21,7 +21,7 @@ class User(Base):
     """
 
     __tablename__ = f"{TABLE_PREFIX}users"
-    __table_args__ = {'schema': 'dbo'}
+    
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True)
     nom: Mapped[str] = mapped_column(String(150))
@@ -46,7 +46,7 @@ class RefreshToken(Base):
     """
 
     __tablename__ = f"{TABLE_PREFIX}refresh_tokens"
-    __table_args__ = {'schema': 'dbo'}
+    
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True)
     user_id: Mapped[str] = mapped_column(ForeignKey(f"{TABLE_PREFIX}users.id", ondelete="CASCADE"), index=True)

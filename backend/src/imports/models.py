@@ -21,7 +21,7 @@ class ImportBatch(Base):
     """
 
     __tablename__ = f"{TABLE_PREFIX}import_batches"
-    __table_args__ = {'schema': 'dbo'}
+    
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True)
     operator_id: Mapped[str] = mapped_column(ForeignKey(f"{TABLE_PREFIX}users.id", ondelete="SET NULL"), nullable=True)
@@ -37,7 +37,7 @@ class ImportBatch(Base):
 
 class ImportRowResult(Base):
     __tablename__ = f"{TABLE_PREFIX}import_row_results"
-    __table_args__ = {'schema': 'dbo'}
+    
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     batch_id: Mapped[str] = mapped_column(ForeignKey(f"{TABLE_PREFIX}import_batches.id", ondelete="CASCADE"), index=True)

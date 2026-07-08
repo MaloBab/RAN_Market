@@ -17,7 +17,7 @@ class DevisRequest(Base):
     """Demande de devis (CDC §3.5) — aligné sur `DevisRequest` (frontend/src/types/devis.types.ts)."""
 
     __tablename__ = f"{TABLE_PREFIX}devis_requests"
-    __table_args__ = {'schema': 'dbo'}
+    
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True)
     reference: Mapped[str] = mapped_column(String(30), unique=True, index=True)
@@ -41,7 +41,7 @@ class DevisRequest(Base):
 
 class DevisPrestationSouhaitee(Base):
     __tablename__ = f"{TABLE_PREFIX}devis_prestations_souhaitees"
-    __table_args__ = {'schema': 'dbo'}
+    
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     devis_id: Mapped[str] = mapped_column(ForeignKey(f"{TABLE_PREFIX}devis_requests.id", ondelete="CASCADE"), index=True)

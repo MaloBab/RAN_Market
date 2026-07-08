@@ -17,7 +17,7 @@ class ComingSoonEntry(Base):
     """Aligné sur `ComingSoonEntry` (frontend/src/types/robot.types.ts) — CDC §3.7."""
 
     __tablename__ = f"{TABLE_PREFIX}coming_soon_entries"
-    __table_args__ = {'schema': 'dbo'}
+    
 
     id: Mapped[str] = mapped_column(String(50), primary_key=True)
     modele: Mapped[str] = mapped_column(String(150))

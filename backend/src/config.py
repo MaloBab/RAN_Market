@@ -71,7 +71,6 @@ class Settings(BaseSettings):
 @lru_cache
 def get_settings() -> Settings:
     settings = Settings()
-    print(settings.DATABASE_URL)
 
     if not settings.SECRET_KEY:
         raise RuntimeError("SECRET_KEY est obligatoire. A Générer avec `python -c \"import secrets; print(secrets.token_urlsafe(64))\"` et définissez-la dans le fichier .env.")
