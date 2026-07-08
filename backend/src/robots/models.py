@@ -2,15 +2,8 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 
-from sqlalchemy import (
-    Enum as SQLEnum,
-    Float,
-    ForeignKey,
-    Integer,
-    String,
-    Text,
-)
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy import Enum as SQLEnum, Float, ForeignKey, Integer, String #type: ignore
+from sqlalchemy.orm import Mapped, mapped_column, relationship #type: ignore
 
 from src.database import TABLE_PREFIX, Base
 from src.shared.enums import BaieType, NiveauRenovation, RobotStatut, RobotType
@@ -34,6 +27,7 @@ class Robot(Base):
     """
 
     __tablename__ = f"{TABLE_PREFIX}robots"
+    __table_args__ = {'schema': 'dbo'}
 
     id: Mapped[str] = mapped_column(String(50), primary_key=True)  # ex: FANUC-2024-001
     modele: Mapped[str] = mapped_column(String(150))
@@ -89,6 +83,7 @@ class RobotPrestation(Base):
     """Niveaux de rénovation disponibles pour une fiche (PrestationRenovation)."""
 
     __tablename__ = f"{TABLE_PREFIX}robot_prestations"
+    __table_args__ = {'schema': 'dbo'}
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     robot_id: Mapped[str] = mapped_column(ForeignKey(f"{TABLE_PREFIX}robots.id", ondelete="CASCADE"), index=True)
@@ -102,6 +97,7 @@ class RobotPhoto(Base):
     """Photos avant rénovation (RobotMedia.photosAvant)."""
 
     __tablename__ = f"{TABLE_PREFIX}robot_photos"
+    __table_args__ = {'schema': 'dbo'}
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     robot_id: Mapped[str] = mapped_column(ForeignKey(f"{TABLE_PREFIX}robots.id", ondelete="CASCADE"), index=True)
@@ -115,6 +111,7 @@ class RobotGalerieItem(Base):
     """Paires avant/après (RobotMedia.galerieAvantApres)."""
 
     __tablename__ = f"{TABLE_PREFIX}robot_galerie_items"
+    __table_args__ = {'schema': 'dbo'}
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     robot_id: Mapped[str] = mapped_column(ForeignKey(f"{TABLE_PREFIX}robots.id", ondelete="CASCADE"), index=True)
@@ -129,6 +126,7 @@ class RobotVenteHistorique(Base):
     """Historique de ventes — visible uniquement en vue commerciale ("si applicable", CDC §2.1)."""
 
     __tablename__ = f"{TABLE_PREFIX}robot_ventes_historique"
+    __table_args__ = {'schema': 'dbo'}
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     robot_id: Mapped[str] = mapped_column(ForeignKey(f"{TABLE_PREFIX}robots.id", ondelete="CASCADE"), index=True)

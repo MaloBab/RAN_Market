@@ -15,7 +15,7 @@ from __future__ import annotations
 import asyncio
 import uuid
 
-from sqlalchemy import select
+from sqlalchemy import select #type: ignore
 
 from src.auth.models import User
 from src.database import Base, async_session_factory, engine
@@ -95,6 +95,8 @@ async def seed() -> None:
     print("Seed terminé :")
     for u in DEMO_USERS:
         print(f"  - {u['email']} / {u['password']}  (rôle: {u['role'].value})")
+        
+    await engine.dispose() 
 
 
 if __name__ == "__main__":

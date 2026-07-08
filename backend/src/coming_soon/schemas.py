@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from pydantic import Field
+from pydantic import Field #type: ignore
 
 from src.shared.enums import NiveauRenovation, RobotType
 from src.shared.schemas import CamelModel

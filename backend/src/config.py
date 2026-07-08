@@ -14,32 +14,45 @@ import secrets
 import warnings
 from functools import lru_cache
 
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic_settings import BaseSettings, SettingsConfigDict #type: ignore
 
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
-
+    
     ENVIRONMENT: str = "development"
-
-    DATABASE_URL: str = "sqlite+aiosqlite:///./ran_catalogue.db"
+    
+    DB_USER: str = ""
+    DB_PASSWORD: str = ""
+    DB_HOST: str = ""
+    DB_PORT: int = 0
+    DB_NAME: str = ""
 
     SECRET_KEY: str = ""
     JWT_ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 15
-    REFRESH_TOKEN_EXPIRE_MINUTES: int = 480  # 8h, aligné sur une journée de travail (cf. frontend)
+    REFRESH_TOKEN_EXPIRE_MINUTES: int = 480 
 
     CORS_ORIGINS: str = '["http://localhost:5173","http://127.0.0.1:5173"]'
 
     COOKIE_SECURE: bool = False
     REFRESH_COOKIE_NAME: str = "ran_refresh_token"
 
-    UPLOAD_DIR: str = "./uploads"
     MAX_UPLOAD_SIZE_MB: int = 10
     MAX_IMPORT_ROWS: int = 500
 
     LOGIN_RATE_LIMIT: str = "5/minute"
-
+    
+    @property
+    def DATABASE_URL(self) -> str:
+        from urllib.parse import quote_plus
+        user = quote_plus(self.DB_USER)
+        password = quote_plus(self.DB_PASSWORD)
+        return (
+            f"mssql+aioodbc://{user}:{password}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
+            "?driver=ODBC+Driver+18+for+SQL+Server&TrustServerCertificate=yes"
+        )
+    
     @property
     def cors_origins_list(self) -> list[str]:
         try:
@@ -58,24 +71,10 @@ class Settings(BaseSettings):
 @lru_cache
 def get_settings() -> Settings:
     settings = Settings()
+    print(settings.DATABASE_URL)
 
     if not settings.SECRET_KEY:
-        if settings.is_production:
-            raise RuntimeError(
-                "SECRET_KEY est obligatoire en production. "
-                "Générez-en une avec `python -c \"import secrets; print(secrets.token_urlsafe(64))\"` "
-                "et définissez-la dans l'environnement / le fichier .env."
-            )
-        # Dev uniquement : clé éphémère générée à chaque démarrage pour que
-        # l'app fonctionne sans configuration, tout en évitant une clé fixe
-        # partagée par tout le monde dans le code source.
-        settings.SECRET_KEY = secrets.token_urlsafe(64)
-        warnings.warn(
-            "SECRET_KEY absente de l'environnement : une clé aléatoire éphémère a été "
-            "générée pour ce process (dev uniquement). Toutes les sessions seront "
-            "invalidées au redémarrage. Définissez SECRET_KEY dans .env pour la persistance.",
-            stacklevel=2,
-        )
+        raise RuntimeError("SECRET_KEY est obligatoire. A Générer avec `python -c \"import secrets; print(secrets.token_urlsafe(64))\"` et définissez-la dans le fichier .env.")
 
     if settings.is_production and not settings.COOKIE_SECURE:
         raise RuntimeError("COOKIE_SECURE doit être True en production (cookies transmis en HTTPS uniquement).")

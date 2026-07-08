@@ -20,10 +20,10 @@ import uuid
 from datetime import datetime, timezone
 from io import BytesIO
 
-from fastapi import UploadFile
-from openpyxl import load_workbook
-from pydantic import ValidationError
-from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi import UploadFile #type: ignore
+from openpyxl import load_workbook #type: ignore
+from pydantic import ValidationError #type: ignore
+from sqlalchemy.ext.asyncio import AsyncSession #type: ignore
 
 from src.config import settings
 from src.imports import models, schemas
@@ -56,7 +56,6 @@ async def _read_workbook(file: UploadFile) -> BytesIO:
     if len(raw) == 0:
         raise InvalidFileError("Fichier vide.")
 
-    # Signature ZIP (xlsx = zip) — rejette un fichier renommé qui n'est pas un vrai xlsx.
     if raw[:2] != b"PK":
         raise InvalidFileError("Le fichier n'est pas un classeur Excel (.xlsx) valide.")
 
@@ -95,14 +94,12 @@ def _row_to_robot_create(row_values: dict[str, object], row_number: int) -> robo
     )
 
 
-async def process_import(
-    db: AsyncSession, file: UploadFile, operator_id: str
-) -> schemas.ImportReport:
+async def process_import(db: AsyncSession, file: UploadFile, operator_id: str) -> schemas.ImportReport:
     buffer = await _read_workbook(file)
 
     try:
         workbook = load_workbook(buffer, read_only=True, data_only=True)
-    except Exception as exc:  # fichier corrompu, mot de passe, etc.
+    except Exception as exc:
         raise InvalidFileError("Impossible de lire le fichier Excel (corrompu ou protégé).") from exc
 
     sheet = workbook.active
@@ -126,17 +123,12 @@ async def process_import(
 
     for row_number, raw_row in enumerate(rows_iter, start=2):
         if row_number - 1 > settings.MAX_IMPORT_ROWS:
-            details.append(
-                models.ImportRowResult(
-                    ligne=row_number, id_robot="—", statut=ImportRowStatus.ERREUR,
-                    message=f"Import limité à {settings.MAX_IMPORT_ROWS} lignes.",
-                )
-            )
+            details.append(models.ImportRowResult(ligne=row_number, id_robot="—", statut=ImportRowStatus.ERREUR, message=f"Import limité à {settings.MAX_IMPORT_ROWS} lignes."))
             erreurs += 1
             break
 
         if raw_row is None or all(v is None for v in raw_row):
-            continue  # ligne vide ignorée silencieusement
+            continue 
 
         row_values = {col: raw_row[idx] if idx < len(raw_row) else None for col, idx in header_map.items()}
         robot_id = str(row_values.get("ID_Robot") or "").strip()
@@ -144,22 +136,12 @@ async def process_import(
         try:
             payload = _row_to_robot_create(row_values, row_number)
         except (ValidationError, ValueError, TypeError) as exc:
-            details.append(
-                models.ImportRowResult(
-                    ligne=row_number, id_robot=robot_id or "—",
-                    statut=ImportRowStatus.ERREUR, message=str(exc)[:500],
-                )
-            )
+            details.append(models.ImportRowResult(ligne=row_number, id_robot=robot_id or "—", statut=ImportRowStatus.ERREUR, message=str(exc)[:500]))
             erreurs += 1
             continue
 
         if payload.id in seen_ids:
-            details.append(
-                models.ImportRowResult(
-                    ligne=row_number, id_robot=payload.id,
-                    statut=ImportRowStatus.DOUBLON, message="ID en doublon dans le fichier importé.",
-                )
-            )
+            details.append(models.ImportRowResult(ligne=row_number, id_robot=payload.id, statut=ImportRowStatus.DOUBLON, message="ID en doublon dans le fichier importé."))
             doublons += 1
             continue
         seen_ids.add(payload.id)
@@ -169,9 +151,7 @@ async def process_import(
             details.append(
                 models.ImportRowResult(
                     ligne=row_number, id_robot=payload.id,
-                    statut=ImportRowStatus.DOUBLON, message="Une fiche avec cet ID existe déjà en base.",
-                )
-            )
+                    statut=ImportRowStatus.DOUBLON, message="Une fiche avec cet ID existe déjà en base."))
             doublons += 1
             continue
 
@@ -179,16 +159,11 @@ async def process_import(
             await create_robot(db, payload)
         except ConflictError as exc:
             details.append(
-                models.ImportRowResult(
-                    ligne=row_number, id_robot=payload.id, statut=ImportRowStatus.DOUBLON, message=str(exc),
-                )
-            )
+                models.ImportRowResult(ligne=row_number, id_robot=payload.id, statut=ImportRowStatus.DOUBLON, message=str(exc)))
             doublons += 1
             continue
 
-        details.append(
-            models.ImportRowResult(ligne=row_number, id_robot=payload.id, statut=ImportRowStatus.ACCEPTE)
-        )
+        details.append(models.ImportRowResult(ligne=row_number, id_robot=payload.id, statut=ImportRowStatus.ACCEPTE))
         accepte += 1
 
     batch = models.ImportBatch(
@@ -209,10 +184,4 @@ async def process_import(
         accepte=accepte,
         erreurs=erreurs,
         doublons=doublons,
-        details=[
-            schemas.ImportRowResultSchema(
-                ligne=d.ligne, id_robot=d.id_robot, statut=d.statut, message=d.message
-            )
-            for d in details
-        ],
-    )
+        details=[schemas.ImportRowResultSchema(ligne=d.ligne, id_robot=d.id_robot, statut=d.statut, message=d.message) for d in details])

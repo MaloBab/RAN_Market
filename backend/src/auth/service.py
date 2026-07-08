@@ -3,17 +3,12 @@ from __future__ import annotations
 import uuid
 from datetime import datetime, timedelta, timezone
 
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select #type: ignore
+from sqlalchemy.ext.asyncio import AsyncSession #type: ignore
 
 from src.auth import models, schemas
 from src.config import settings
-from src.security import (
-    create_access_token,
-    generate_refresh_token,
-    hash_refresh_token,
-    verify_password,
-)
+from src.security import (create_access_token, generate_refresh_token, hash_refresh_token, verify_password)
 from src.shared.exceptions import UnauthorizedError
 
 MAX_FAILED_ATTEMPTS = 5
@@ -44,9 +39,7 @@ async def authenticate(db: AsyncSession, credentials: schemas.Credentials) -> mo
     timing) et renvoyer un message d'erreur générique et identique dans
     tous les cas d'échec.
     """
-    result = await db.execute(
-        select(models.User).where(models.User.email == credentials.email.lower())
-    )
+    result = await db.execute(select(models.User).where(models.User.email == credentials.email.lower()))
     user = result.scalar_one_or_none()
 
     # Dummy hash utilisé quand l'utilisateur n'existe pas, pour que
@@ -58,9 +51,7 @@ async def authenticate(db: AsyncSession, credentials: schemas.Credentials) -> mo
         raise UnauthorizedError("Identifiants incorrects.")
 
     if user.locked_until and _as_aware(user.locked_until) > _utcnow():
-        raise UnauthorizedError(
-            "Compte temporairement verrouillé suite à plusieurs échecs de connexion. Réessayez plus tard."
-        )
+        raise UnauthorizedError("Compte temporairement verrouillé suite à plusieurs échecs de connexion. Réessayez plus tard.")
 
     if not user.is_active:
         raise UnauthorizedError("Ce compte est désactivé.")
@@ -90,26 +81,21 @@ async def issue_tokens(db: AsyncSession, user: models.User) -> tuple[str, str, i
         id=str(uuid.uuid4()),
         user_id=user.id,
         token_hash=hash_refresh_token(refresh_plain),
-        expires_at=_utcnow() + timedelta(minutes=settings.REFRESH_TOKEN_EXPIRE_MINUTES),
-    )
+        expires_at=_utcnow() + timedelta(minutes=settings.REFRESH_TOKEN_EXPIRE_MINUTES))
     db.add(refresh_token)
     await db.commit()
 
     return access_token, refresh_plain, settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60
 
 
-async def rotate_refresh_token(
-    db: AsyncSession, refresh_token_plain: str
-) -> tuple[str, str, int, models.User]:
+async def rotate_refresh_token(db: AsyncSession, refresh_token_plain: str) -> tuple[str, str, int, models.User]:
     """
     Vérifie un refresh token présenté (cookie httpOnly), le révoque, et en
     émet un nouveau (rotation) + un nouvel access token. La rotation limite
     la fenêtre d'exploitation si un refresh token venait à fuiter.
     """
     token_hash = hash_refresh_token(refresh_token_plain)
-    result = await db.execute(
-        select(models.RefreshToken).where(models.RefreshToken.token_hash == token_hash)
-    )
+    result = await db.execute(select(models.RefreshToken).where(models.RefreshToken.token_hash == token_hash))
     stored = result.scalar_one_or_none()
 
     if stored is None or stored.revoked or _as_aware(stored.expires_at) < _utcnow():
@@ -128,9 +114,7 @@ async def rotate_refresh_token(
 
 async def revoke_refresh_token(db: AsyncSession, refresh_token_plain: str) -> None:
     token_hash = hash_refresh_token(refresh_token_plain)
-    result = await db.execute(
-        select(models.RefreshToken).where(models.RefreshToken.token_hash == token_hash)
-    )
+    result = await db.execute(select(models.RefreshToken).where(models.RefreshToken.token_hash == token_hash))
     stored = result.scalar_one_or_none()
     if stored is not None:
         stored.revoked = True
@@ -139,10 +123,7 @@ async def revoke_refresh_token(db: AsyncSession, refresh_token_plain: str) -> No
 
 async def revoke_all_user_tokens(db: AsyncSession, user_id: str) -> None:
     result = await db.execute(
-        select(models.RefreshToken).where(
-            models.RefreshToken.user_id == user_id, models.RefreshToken.revoked.is_(False)
-        )
-    )
+        select(models.RefreshToken).where(models.RefreshToken.user_id == user_id, models.RefreshToken.revoked.is_(False)))
     for token in result.scalars().all():
         token.revoked = True
     await db.commit()

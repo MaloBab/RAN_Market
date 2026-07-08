@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 
-from sqlalchemy import DateTime, Enum as SQLEnum, ForeignKey, Integer, String
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy import DateTime, Enum as SQLEnum, ForeignKey, Integer, String #type: ignore
+from sqlalchemy.orm import Mapped, mapped_column, relationship #type: ignore
 
 from src.database import TABLE_PREFIX, Base
 from src.shared.enums import ImportRowStatus
@@ -21,6 +21,7 @@ class ImportBatch(Base):
     """
 
     __tablename__ = f"{TABLE_PREFIX}import_batches"
+    __table_args__ = {'schema': 'dbo'}
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True)
     operator_id: Mapped[str] = mapped_column(ForeignKey(f"{TABLE_PREFIX}users.id", ondelete="SET NULL"), nullable=True)
@@ -31,13 +32,12 @@ class ImportBatch(Base):
     doublons: Mapped[int] = mapped_column(Integer)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow)
 
-    details: Mapped[list["ImportRowResult"]] = relationship(
-        back_populates="batch", cascade="all, delete-orphan", order_by="ImportRowResult.ligne"
-    )
+    details: Mapped[list["ImportRowResult"]] = relationship(back_populates="batch", cascade="all, delete-orphan", order_by="ImportRowResult.ligne")
 
 
 class ImportRowResult(Base):
     __tablename__ = f"{TABLE_PREFIX}import_row_results"
+    __table_args__ = {'schema': 'dbo'}
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     batch_id: Mapped[str] = mapped_column(ForeignKey(f"{TABLE_PREFIX}import_batches.id", ondelete="CASCADE"), index=True)

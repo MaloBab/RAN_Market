@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 
-from sqlalchemy import Boolean, DateTime, Enum as SQLEnum, ForeignKey, String
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy import Boolean, DateTime, Enum as SQLEnum, ForeignKey, String #type: ignore
+from sqlalchemy.orm import Mapped, mapped_column, relationship #type: ignore
 
 from src.database import TABLE_PREFIX, Base
 from src.shared.enums import UserRole
@@ -21,6 +21,7 @@ class User(Base):
     """
 
     __tablename__ = f"{TABLE_PREFIX}users"
+    __table_args__ = {'schema': 'dbo'}
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True)
     nom: Mapped[str] = mapped_column(String(150))
@@ -45,6 +46,7 @@ class RefreshToken(Base):
     """
 
     __tablename__ = f"{TABLE_PREFIX}refresh_tokens"
+    __table_args__ = {'schema': 'dbo'}
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True)
     user_id: Mapped[str] = mapped_column(ForeignKey(f"{TABLE_PREFIX}users.id", ondelete="CASCADE"), index=True)

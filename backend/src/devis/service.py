@@ -4,8 +4,9 @@ import secrets
 import uuid
 from datetime import datetime, timezone
 
-from sqlalchemy import func, select
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import func, select #type: ignore
+from sqlalchemy.ext.asyncio import AsyncSession #type: ignore
+from sqlalchemy.orm import selectinload #type: ignore
 
 from src.auth.models import User
 from src.devis import models, schemas
@@ -19,7 +20,7 @@ def _utcnow() -> datetime:
 
 def _generate_reference() -> str:
     year = _utcnow().year
-    suffix = secrets.token_hex(3).upper()  # 6 caractères hexadécimaux, imprévisible
+    suffix = secrets.token_hex(3).upper()
     return f"DEV-{year}-{suffix}"
 
 
@@ -31,10 +32,7 @@ async def _pick_commercial(db: AsyncSession) -> User:
     """
     result = await db.execute(
         select(User, func.count(models.DevisRequest.id).label("nb_devis"))
-        .outerjoin(
-            models.DevisRequest,
-            models.DevisRequest.commercial_assigne == User.nom,
-        )
+        .outerjoin( models.DevisRequest, models.DevisRequest.commercial_assigne == User.nom)
         .where(User.role == UserRole.COMMERCIAL, User.is_active.is_(True))
         .group_by(User.id)
         .order_by("nb_devis")
@@ -45,9 +43,7 @@ async def _pick_commercial(db: AsyncSession) -> User:
     return row[0]
 
 
-async def create_devis_request(
-    db: AsyncSession, payload: schemas.DevisRequestCreate
-) -> models.DevisRequest:
+async def create_devis_request(db: AsyncSession, payload: schemas.DevisRequestCreate) -> models.DevisRequest:
     commercial = await _pick_commercial(db)
 
     devis = models.DevisRequest(
@@ -62,11 +58,8 @@ async def create_devis_request(
         fonction=payload.fonction,
         robot_id=payload.robot_id,
         demande_speciale=payload.demande_speciale,
-        commercial_assigne=commercial.nom,
-    )
-    devis.prestations_souhaitees = [
-        models.DevisPrestationSouhaitee(niveau=n) for n in payload.prestations_souhaitees
-    ]
+        commercial_assigne=commercial.nom)
+    devis.prestations_souhaitees = [models.DevisPrestationSouhaitee(niveau=n) for n in payload.prestations_souhaitees]
     db.add(devis)
     await db.commit()
     await db.refresh(devis, attribute_names=["prestations_souhaitees"])
@@ -74,7 +67,7 @@ async def create_devis_request(
 
 
 async def list_devis_requests(db: AsyncSession) -> list[models.DevisRequest]:
-    from sqlalchemy.orm import selectinload
+    
 
     stmt = (
         select(models.DevisRequest)

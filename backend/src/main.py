@@ -18,11 +18,11 @@ from __future__ import annotations
 import logging
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Request
-from fastapi.middleware.cors import CORSMiddleware
-from slowapi import _rate_limit_exceeded_handler
-from slowapi.errors import RateLimitExceeded
-from slowapi.middleware import SlowAPIMiddleware
+from fastapi import FastAPI, Request #type: ignore
+from fastapi.middleware.cors import CORSMiddleware #type: ignore
+from slowapi import _rate_limit_exceeded_handler #type: ignore
+from slowapi.errors import RateLimitExceeded #type: ignore
+from slowapi.middleware import SlowAPIMiddleware #type: ignore
 
 from src.auth.router import limiter as auth_limiter
 from src.auth.router import router as auth_router

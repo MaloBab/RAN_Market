@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from pydantic import EmailStr, Field
+from pydantic import EmailStr, Field #type: ignore
 
 from src.shared.enums import UserRole
 from src.shared.schemas import CamelModel

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, File, UploadFile
-from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi import APIRouter, Depends, File, UploadFile #type: ignore
+from sqlalchemy.ext.asyncio import AsyncSession #type: ignore
 
 from src.auth.dependencies import require_roles
 from src.auth.models import User
@@ -13,11 +13,7 @@ router = APIRouter(prefix="/imports", tags=["imports"])
 
 
 @router.post("/robots", response_model=schemas.ImportReport)
-async def import_robots_excel(
-    file: UploadFile = File(...),
-    current_user: User = Depends(require_roles(UserRole.RESPONSABLE_RAN)),
-    db: AsyncSession = Depends(get_db),
-):
+async def import_robots_excel(file: UploadFile = File(...), current_user: User = Depends(require_roles(UserRole.RESPONSABLE_RAN)), db: AsyncSession = Depends(get_db)):
     """
     POST /imports/robots — import Excel de masse (CDC §3.6), réservé au
     responsable RAN. Toutes les fiches créées sont en statut "Brouillon"

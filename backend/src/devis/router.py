@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, Request
-from slowapi import Limiter
-from slowapi.util import get_remote_address
-from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi import APIRouter, Depends, Request #type: ignore
+from slowapi import Limiter #type: ignore
+from slowapi.util import get_remote_address #type: ignore
+from sqlalchemy.ext.asyncio import AsyncSession #type: ignore
 
 from src.auth.dependencies import require_roles
 from src.auth.models import User
@@ -17,11 +17,7 @@ limiter = Limiter(key_func=get_remote_address)
 
 @router.post("", response_model=schemas.DevisSubmissionResult, status_code=201)
 @limiter.limit("10/hour")
-async def submit_devis_request(
-    request: Request,
-    payload: schemas.DevisRequestCreate,
-    db: AsyncSession = Depends(get_db),
-):
+async def submit_devis_request(request: Request, payload: schemas.DevisRequestCreate, db: AsyncSession = Depends(get_db)):
     """
     POST /devis — formulaire de demande de devis (CDC §3.5), accessible
     sans authentification (client ou commercial). Limité par IP pour
@@ -36,10 +32,7 @@ async def submit_devis_request(
 
 
 @router.get("", response_model=list[schemas.DevisRequestSummary])
-async def list_devis_requests(
-    current_user: User = Depends(require_roles(UserRole.COMMERCIAL, UserRole.RESPONSABLE_RAN)),
-    db: AsyncSession = Depends(get_db),
-):
+async def list_devis_requests(current_user: User = Depends(require_roles(UserRole.COMMERCIAL, UserRole.RESPONSABLE_RAN)), db: AsyncSession = Depends(get_db)):
     """GET /devis — suivi back-office des demandes reçues, réservé aux comptes authentifiés."""
     devis_list = await service.list_devis_requests(db)
     return [service.to_summary(d) for d in devis_list]

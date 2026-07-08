@@ -24,7 +24,7 @@ from src.config import settings
 # vérité — chaque modèle SQLAlchemy construit son `__tablename__` (et ses
 # `ForeignKey`) à partir de cette constante plutôt que de répéter le
 # préfixe en dur, pour ne jamais désynchroniser l'un des deux.
-TABLE_PREFIX = "dbo.ranmarket_"
+TABLE_PREFIX = "ranmarket_"
 
 engine_kwargs: dict = {"echo": False}
 

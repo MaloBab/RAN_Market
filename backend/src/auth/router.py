@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, Request, Response, status
-from slowapi import Limiter
-from slowapi.util import get_remote_address
-from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi import APIRouter, Depends, Request, Response, status #type: ignore
+from slowapi import Limiter #type: ignore
+from slowapi.util import get_remote_address #type: ignore
+from sqlalchemy.ext.asyncio import AsyncSession #type: ignore
 
 from src.auth import schemas, service
 from src.auth.dependencies import get_current_user

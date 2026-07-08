@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from pydantic import EmailStr, Field
+from pydantic import EmailStr, Field #type: ignore
 
 from src.shared.enums import NiveauRenovation
 from src.shared.schemas import CamelModel

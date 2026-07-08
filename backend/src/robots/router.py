@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, Query
-from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi import APIRouter, Depends, Query #type: ignore
+from sqlalchemy.ext.asyncio import AsyncSession #type: ignore
 
 from src.auth.dependencies import get_current_user_optional, require_roles
 from src.auth.models import User

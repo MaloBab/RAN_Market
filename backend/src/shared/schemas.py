@@ -11,7 +11,7 @@ aucune modification du frontend.
 """
 from __future__ import annotations
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict #type: ignore
 
 
 def to_camel(snake_str: str) -> str:
