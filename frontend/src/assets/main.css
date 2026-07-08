@@ -6,7 +6,7 @@
   Identité de marque FANUC reprise du logo : jaune (mark, mise en avant)
   + rouge (action principale, comme le rouge du mot "FANUC" sur fond jaune).
 */
-:root {
+@theme {
   /* Neutres — fond clair, texte encre, pas de gris-bleu générique */
   --color-ink-950: #0d0f12;
   --color-ink-900: #16181d;

@@ -4,7 +4,6 @@
  * `canToggleView` (= utilisateur Commercial authentifié).
  */
 import { useViewStrategy } from '@/composables/useViewStrategy'
-import BaseBadge from '@/components/ui/BaseBadge.vue'
 
 const { effectiveDisplayMode, canToggleView, toggle } = useViewStrategy()
 </script>
@@ -27,6 +26,5 @@ const { effectiveDisplayMode, canToggleView, toggle } = useViewStrategy()
       <span class="relative z-10 w-1/2 text-center text-[11px] font-semibold" :class="effectiveDisplayMode === 'commerciale' ? 'text-ink-900' : 'text-ink-400'">COM</span>
       <span class="relative z-10 w-1/2 text-center text-[11px] font-semibold" :class="effectiveDisplayMode === 'client' ? 'text-ink-900' : 'text-ink-400'">CLI</span>
     </span>
-    <BaseBadge v-if="effectiveDisplayMode === 'client'" tone="yellow">démo</BaseBadge>
   </button>
 </template>

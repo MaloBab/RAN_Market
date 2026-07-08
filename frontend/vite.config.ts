@@ -3,8 +3,9 @@ import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import tailwindcss from '@tailwindcss/vite'
 
-// Frontend-only build. The `/api` proxy below documents where a future
-// backend would be wired in (see src/services/* for the contract).
+const BACKEND_URL = 'http://localhost:8000'
+const BACKEND_PREFIXES = ['/auth', '/robots', '/devis', '/coming-soon', '/imports']
+
 export default defineConfig({
   plugins: [vue(), tailwindcss()],
   resolve: {
@@ -13,10 +14,8 @@ export default defineConfig({
     }
   },
   server: {
-    proxy: {
-      // '/api': 'http://localhost:3000' // future backend entrypoint
-    }
+    proxy: Object.fromEntries(
+      BACKEND_PREFIXES.map((prefix) => [prefix, { target: BACKEND_URL, changeOrigin: true }])
+    )
   }
 })
-
-

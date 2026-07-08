@@ -1,9 +1,12 @@
 /**
  * Interfaces de service (DIP) — chaque store/composable dépend de ces
- * abstractions, jamais des implémentations mock directement. Le jour où
- * un vrai backend existe, on écrit une classe `HttpXxxService implements
- * XxxService` et on la branche dans `services/index.ts` sans toucher au
- * reste de l'app.
+ * abstractions, jamais des implémentations concrètes directement.
+ *
+ * NB sur AuthService : la signature a changé par rapport à la version mock.
+ * Le backend réel gère le refresh token via un cookie httpOnly (jamais
+ * exposé au JS), donc logout/refresh n'ont plus besoin qu'on leur passe un
+ * token explicitement — le navigateur l'envoie automatiquement avec
+ * `credentials: 'include'`.
  */
 import type {
   AuthSession,
@@ -17,64 +20,40 @@ import type {
 } from '@/types'
 
 export interface AuthService {
-  /**
-   * POST /api/auth/login  Body: Credentials  → AuthSession
-   * Backend réel : vérifie le hash (bcrypt/argon2) côté serveur, émet
-   * un JWT signé + refresh token en cookie httpOnly. Ce mock vérifie un
-   * hash PBKDF2 local à titre de démonstration — ce n'est PAS un
-   * mécanisme de sécurité de production (voir utils/crypto.ts).
-   */
+  /** POST /auth/login — Body: Credentials → access token + user (cookie refresh posé par le serveur). */
   login(credentials: Credentials): Promise<AuthSession>
 
-  /** POST /api/auth/logout — invalide le token côté serveur. */
-  logout(token: string): Promise<void>
+  /** POST /auth/logout — révoque le refresh token courant (lu depuis le cookie httpOnly) et l'efface. */
+  logout(): Promise<void>
 
-  /** GET /api/auth/session — revalide un token existant (ex: au reload). */
-  getSession(token: string): Promise<AuthSession | null>
+  /**
+   * POST /auth/refresh — utilise le cookie httpOnly pour émettre un nouvel
+   * access token, sans réauthentification. Renvoie `null` si aucune session
+   * active (pas de cookie, ou refresh token expiré/révoqué).
+   */
+  refreshSession(): Promise<AuthSession | null>
 }
 
 export interface RobotService {
-  /**
-   * GET /api/robots?filters=...
-   * Retourne le catalogue filtré. Le filtrage est fait côté service
-   * (mock: en mémoire) pour refléter un futur filtrage côté serveur.
-   */
+  /** GET /robots?... — catalogue filtré (vue client ou commerciale selon l'auth). */
   list(filters: Partial<CatalogueFilters>): Promise<Robot[]>
 
-  /** GET /api/robots/:id */
+  /** GET /robots/:id — renvoie `null` si absente ou non publiée (404 backend). */
   getById(id: string): Promise<Robot | null>
 
-  /** GET /api/coming-soon — réservé vue commerciale (filtré côté serveur). */
+  /** GET /coming-soon — réservé vue commerciale (401/403 backend sinon). */
   listComingSoon(): Promise<ComingSoonEntry[]>
 
-  /**
-   * POST /api/robots  (back-office, rôle responsable_ran requis)
-   * Création manuelle d'une fiche robot (CDC §2.3). Statut initial
-   * "Brouillon" comme pour l'import Excel, jusqu'à validation.
-   */
+  /** POST /robots (back-office, rôle responsable_ran requis). Statut initial "Brouillon". */
   create(input: Omit<Robot, 'statut'>): Promise<Robot>
 }
 
 export interface DevisService {
-  /**
-   * POST /api/devis
-   * Body: DevisRequest. Réponse: référence + commercial assigné.
-   * Le backend réel enverrait l'email via le provider SMTP/SendGrid
-   * mentionné au CDC §4.4.
-   */
+  /** POST /devis — Body: DevisRequest. Réponse: référence + commercial assigné. */
   submit(payload: DevisRequest): Promise<DevisSubmissionResult>
 }
 
 export interface ImportService {
-  /**
-   * POST /api/back-office/import (multipart/form-data, champ `file`)
-   * Réponse: ImportReport. En attendant un vrai backend, le mock simule
-   * un parsing ligne à ligne avec une progression observable.
-   */
-  importExcel(
-    file: File,
-    onProgress?: (pct: number) => void
-  ): Promise<ImportReport>
+  /** POST /imports/robots (multipart/form-data, champ `file`) → ImportReport. */
+  importExcel(file: File, onProgress?: (pct: number) => void): Promise<ImportReport>
 }
-
-

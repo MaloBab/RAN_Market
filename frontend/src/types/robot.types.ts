@@ -70,8 +70,17 @@ export interface Robot {
   prestationsDisponibles: PrestationRenovation[]
   media: RobotMedia
   documentation: RobotDocumentation
-  commercial: RobotDonneesCommerciales
-  statut: RobotStatut
+  /**
+   * Optionnel : le backend omet structurellement ce champ dans la vue
+   * client (anonyme ou rôle "client") — voir RobotClientResponse côté
+   * backend. Présent uniquement pour un utilisateur authentifié
+   * commercial/responsable_ran. Toujours garder cette absence
+   * *structurelle* : ne jamais réintroduire une valeur par défaut ici,
+   * l'absence est le mécanisme de sécurité, pas un détail d'implémentation.
+   */
+  commercial?: RobotDonneesCommerciales
+  /** Optionnel pour la même raison que `commercial` ci-dessus. */
+  statut?: RobotStatut
 }
 
 /** Entrée simplifiée de la section "Coming Soon" (§3.7) — vue commerciale uniquement. */
@@ -82,5 +91,3 @@ export interface ComingSoonEntry {
   disponibiliteEstimee: string // ex: "T1 2027"
   niveauRenovationPrevu: NiveauRenovation
 }
-
-

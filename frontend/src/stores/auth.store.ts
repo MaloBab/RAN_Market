@@ -3,17 +3,10 @@ import { ref, computed } from 'vue'
 import type { AuthenticatedUser, AuthSession, Credentials, DisplayMode, UserRole } from '@/types'
 import { authService } from '@/services'
 
-const SESSION_STORAGE_KEY = 'ran-catalogue.session-token'
-
 /**
  * Authentification réelle (login/session/logout) + mode d'affichage
  * actif (commerciale/client), qui n'est pertinent que pour un
  * Commercial authentifié (CDC §5.2).
- *
- * Le token est gardé en `sessionStorage` (effacé à la fermeture de
- * l'onglet) plutôt qu'en `localStorage`, pour limiter la durée de vie
- * du secret côté client. En production, ce token serait de toute façon
- * un cookie httpOnly + secure géré par le serveur, invisible du JS.
  */
 export const useAuthStore = defineStore('auth', () => {
   const currentUser = ref<AuthenticatedUser | null>(null)
@@ -37,13 +30,11 @@ export const useAuthStore = defineStore('auth', () => {
     currentUser.value = session.user
     sessionToken.value = session.token
     displayMode.value = 'commerciale'
-    sessionStorage.setItem(SESSION_STORAGE_KEY, session.token)
   }
 
   function clearSession() {
     currentUser.value = null
     sessionToken.value = null
-    sessionStorage.removeItem(SESSION_STORAGE_KEY)
   }
 
   async function login(credentials: Credentials): Promise<boolean> {
@@ -62,21 +53,19 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   async function logout() {
-    if (sessionToken.value) {
-      await authService.logout(sessionToken.value)
-    }
+    await authService.logout()
     clearSession()
   }
 
-  /** Revalide un token stocké au (re)chargement de l'app. */
+  /**
+   * Au (re)chargement de l'app : tente un refresh silencieux via le cookie
+   * httpOnly. Si aucune session active côté serveur (pas de cookie, ou
+   * refresh token expiré/révoqué), l'utilisateur reste simplement déconnecté
+   * — pas d'erreur affichée, c'est un état normal (première visite, etc.).
+   */
   async function restoreSession() {
     isRestoring.value = true
-    const token = sessionStorage.getItem(SESSION_STORAGE_KEY)
-    if (!token) {
-      isRestoring.value = false
-      return
-    }
-    const session = await authService.getSession(token)
+    const session = await authService.refreshSession()
     if (session) {
       applySession(session)
     } else {
@@ -97,5 +86,3 @@ export const useAuthStore = defineStore('auth', () => {
     login, logout, restoreSession, toggleDisplayMode
   }
 })
-
-
